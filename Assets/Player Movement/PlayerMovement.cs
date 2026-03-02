@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Player Settings")]
     public float acceleration = 10f;
     public float topSpeed = 5f;
+    public float runSpeed = 10f;
 
     [Header("Jump Settings")]
     public float jumpForce = 5f;
@@ -24,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Grounded state
     private bool isGrounded = false;
+    public bool isRunning = false;
 
     void Start()
     {
@@ -72,6 +74,20 @@ public class PlayerMovement : MonoBehaviour
         if (ctx.performed && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+    }
+
+    public void Run(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
+        {
+            isRunning = true;
+            //topSpeed = runSpeed;
+        }
+        else if (ctx.canceled)
+        {
+            isRunning = false;
+            //topSpeed = 5f; // reset to default walk speed
         }
     }
 
