@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using System.Runtime.CompilerServices;
 
 
 public class PlatformMovement : MonoBehaviour
@@ -20,13 +22,16 @@ public class PlatformMovement : MonoBehaviour
 
     private int _targetWaypointIndex;
 
+
     private Transform _previousWaypoint;
     private Transform _targetWaypoint;
 
     private float _timetoWaypoint;
     private float _elapsedTime;
 
+    // External triggers can set this to control when the platform starts moving (e.g., when the player steps on it)
     public bool canMove = false;
+    
 
     // Track current rider so we can unparent when they leave the overlap area
     private Transform _currentRider;
@@ -36,32 +41,44 @@ public class PlatformMovement : MonoBehaviour
         TargetNextWaypoint();
     }
 
+
+
     void FixedUpdate()
     {
-        //Detects the rider first so we know if the player is there
         DetectAndHandleRider();
-        
-        //Can only move if the rider and canMove is true
-        if (canMove && _currentRider != null)
+
+        // 1. Determine if we should move forward (Player is on) or return (Player is off)
+        bool shouldMoveForward = (_currentRider != null && _targetWaypointIndex < 2); // Stops at Waypoint 2
+        bool shouldReturnHome = (_currentRider == null && transform.position != _waypointPath.GetWaypoint(0).position);
+
+        if (canMove && (shouldMoveForward || shouldReturnHome))
         {
-            _elapsedTime += Time.deltaTime;
-
-            float elapsedPercentage = _elapsedTime / _timetoWaypoint;
-            elapsedPercentage = Mathf.SmoothStep(0, 1, elapsedPercentage);
-            transform.position = Vector3.Lerp(_previousWaypoint.position, _targetWaypoint.position, elapsedPercentage);
-            transform.rotation = Quaternion.Lerp(_previousWaypoint.rotation, _targetWaypoint.rotation, elapsedPercentage);
-
-            // Detect player using an overlap box so characters that don't use physics collisions still get parented
-
-
-            if (elapsedPercentage >= 1.0f)
+            // If returning home, override the target to Waypoint 0
+            if (shouldReturnHome && _targetWaypointIndex != 0)
             {
+                _targetWaypointIndex = 0;
                 TargetNextWaypoint();
             }
 
+            _elapsedTime += Time.deltaTime;
+            float elapsedPercentage = Mathf.Clamp01(_elapsedTime / _timetoWaypoint);
+            elapsedPercentage = Mathf.SmoothStep(0, 1, elapsedPercentage);
+
+            transform.position = Vector3.Lerp(_previousWaypoint.position, _targetWaypoint.position, elapsedPercentage);
+            transform.rotation = Quaternion.Lerp(_previousWaypoint.rotation, _targetWaypoint.rotation, elapsedPercentage);
+
+            if (elapsedPercentage >= 1.0f)
+            {
+                // If we are moving forward and haven't hit the stop, get next
+                if (shouldMoveForward)
+                {
+                    TargetNextWaypoint();
+                }
+            }
         }
-        
     }
+
+
 
     private void DetectAndHandleRider()
     {
@@ -114,8 +131,11 @@ public class PlatformMovement : MonoBehaviour
         _timetoWaypoint = distanceToWaypoint / _speed;
 
         // Removed incorrect BoxCast; overlap checking handled every FixedUpdate in DetectAndHandleRider
+
+
     }
 
+   
     private void OnCollisionEnter(Collision other)
     {
         if (other.transform.CompareTag("Player"))
