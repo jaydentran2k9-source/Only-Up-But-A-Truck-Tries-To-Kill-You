@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class PlayerMovement : MonoBehaviour
     private float sideInput;
     private float forwardInput;
 
+    //Checks if the player has been knocked back
+    private bool isKnockedBack = false;
+
     // Grounded state
     private bool isGrounded = false;
     public bool isRunning = false;
@@ -31,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         tf = GetComponent<Transform>();
-}
+    }
 
 
 

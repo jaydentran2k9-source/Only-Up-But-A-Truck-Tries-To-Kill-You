@@ -73,6 +73,7 @@ public class PlatformMovement : MonoBehaviour
                 if (shouldMoveForward)
                 {
                     TargetNextWaypoint();
+                    Debug.Log($"Reached Waypoint {_targetWaypointIndex}, moving to next.");
                 }
             }
         }
@@ -130,9 +131,7 @@ public class PlatformMovement : MonoBehaviour
         float distanceToWaypoint = Vector3.Distance(_previousWaypoint.position, _targetWaypoint.position);
         _timetoWaypoint = distanceToWaypoint / _speed;
 
-        // Removed incorrect BoxCast; overlap checking handled every FixedUpdate in DetectAndHandleRider
-
-
+        
     }
 
    
