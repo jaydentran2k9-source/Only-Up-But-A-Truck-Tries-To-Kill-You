@@ -2662,6 +2662,36 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 474263738441099847, guid: f751f721f711f984e90fab97506d5586,
+        type: 3}
+      propertyPath: runSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 474263738441099847, guid: f751f721f711f984e90fab97506d5586,
+        type: 3}
+      propertyPath: topSpeed
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 474263738441099847, guid: f751f721f711f984e90fab97506d5586,
+        type: 3}
+      propertyPath: acceleration
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 474263738441099847, guid: f751f721f711f984e90fab97506d5586,
+        type: 3}
+      propertyPath: knockbackDuration
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 474263738441099847, guid: f751f721f711f984e90fab97506d5586,
+        type: 3}
+      propertyPath: upwardKnockbackBoost
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 474263738441099847, guid: f751f721f711f984e90fab97506d5586,
+        type: 3}
+      propertyPath: horizontalKnockbackMultiplier
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 2216211321714755194, guid: f751f721f711f984e90fab97506d5586,
         type: 3}
       propertyPath: m_Name

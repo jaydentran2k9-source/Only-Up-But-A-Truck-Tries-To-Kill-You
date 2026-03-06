@@ -26,13 +26,18 @@ public class PlayerMovement : MonoBehaviour
 
     //Checks if the player has been knocked back
     private bool isKnockedBack;
+    [Header("Knockback Settings")]
     [SerializeField] private float knockbackDuration = 0.5f;
-    
 
+    /* Inserted configurable fields for tuning horizontal and vertical knockback */
+    [SerializeField] private float horizontalKnockbackMultiplier = 1.5f;
+    [SerializeField] private float upwardKnockbackBoost = 0.2f;
 
     // Grounded state
     private bool isGrounded = false;
     public bool isRunning = false;
+
+    private PlatformTrigger1 currentPlatform;
 
     void Start()
     {
@@ -66,6 +71,12 @@ public class PlayerMovement : MonoBehaviour
         Vector3 velocity = Vector3.ClampMagnitude(new(rb.linearVelocity.x, 0, rb.linearVelocity.z), topSpeed);
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
+
+        if (currentPlatform != null)
+        {
+            // Add the platform's velocity to the player's current velocity
+            rb.linearVelocity += currentPlatform.velocity * Time.fixedDeltaTime;
+        }
     }
 
     public void Move(InputAction.CallbackContext ctx)
@@ -98,6 +109,18 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter(Collision col)
+    {
+        if (col.gameObject.CompareTag("MovingPlatform"))
+            currentPlatform = col.gameObject.GetComponent<PlatformTrigger1>();
+    }
+
+    private void OnCollisionExit(Collision col)
+    {
+        if (col.gameObject.CompareTag("MovingPlatform"))
+            currentPlatform = null;
+    }
+
     public void ApplyKnockback(Vector3 direction, float force)
     {
         if (isKnockedBack) return;
@@ -111,10 +134,23 @@ public class PlayerMovement : MonoBehaviour
         // Reset velocity for a consistent feel
         rb.linearVelocity = Vector3.zero;
 
-        // Apply force in the specific direction the enemy was facing
-        // We add a tiny bit of 'up' (0.2f) so they don't get stuck on the floor
-        Vector3 finalDirection = (direction + Vector3.up * 0.2f).normalized;
-        rb.AddForce(finalDirection * force, ForceMode.Impulse);
+        // Compute horizontal direction (XZ plane)
+        Vector3 horizontalDir = new Vector3(direction.x, 0f, direction.z);
+        if (horizontalDir.sqrMagnitude < 0.0001f)
+        {
+            // Fallback to player's forward direction projected onto XZ if input direction is nearly zero
+            horizontalDir = new Vector3(tf.forward.x, 0f, tf.forward.z);
+        }
+        horizontalDir = horizontalDir.normalized;
+
+        // Scale horizontal and vertical components separately
+        Vector3 horizontalImpulse = horizontalDir * (force * horizontalKnockbackMultiplier);
+        Vector3 verticalImpulse = Vector3.up * (upwardKnockbackBoost * force);
+
+        // Final impulse combines boosted horizontal force and a small upward lift
+        Vector3 finalImpulse = horizontalImpulse + verticalImpulse;
+
+        rb.AddForce(finalImpulse, ForceMode.Impulse);
 
         yield return new WaitForSeconds(knockbackDuration);
 

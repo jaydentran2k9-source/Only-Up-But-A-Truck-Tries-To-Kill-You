@@ -10,6 +10,10 @@ public class PlatformTrigger1 : MonoBehaviour
     [Tooltip("Drag the tRucKspawner instance here. If left empty, the script will try to find one at Start.")]
     public tRucKspawner spawner;
 
+    public Vector3 velocity {get; private set; }
+    private Vector3 lastPosition;
+    private Rigidbody rb;
+
     void Start()
     {
         if (spawner == null)
@@ -18,6 +22,16 @@ public class PlatformTrigger1 : MonoBehaviour
         }
 
         print(spawner);
+
+        rb = GetComponent<Rigidbody>();
+        lastPosition = rb.position;
+    }
+
+    void FixedUpdate()
+    {
+        // Calculate velocity: (Current Position - Last Position) / Time
+        velocity = (rb.position - lastPosition) / Time.fixedDeltaTime;
+        lastPosition = rb.position;
     }
 
     void OnTriggerEnter(Collider other)
