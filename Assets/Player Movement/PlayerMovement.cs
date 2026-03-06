@@ -25,7 +25,10 @@ public class PlayerMovement : MonoBehaviour
     private float forwardInput;
 
     //Checks if the player has been knocked back
-    private bool isKnockedBack = false;
+    private bool isKnockedBack;
+    [SerializeField] private float knockbackDuration = 0.5f;
+    
+
 
     // Grounded state
     private bool isGrounded = false;
@@ -93,6 +96,29 @@ public class PlayerMovement : MonoBehaviour
             isRunning = false;
             //topSpeed = 5f; // reset to default walk speed
         }
+    }
+
+    public void ApplyKnockback(Vector3 direction, float force)
+    {
+        if (isKnockedBack) return;
+        StartCoroutine(KnockbackRoutine(direction, force));
+    }
+
+    private IEnumerator KnockbackRoutine(Vector3 direction, float force)
+    {
+        isKnockedBack = true;
+
+        // Reset velocity for a consistent feel
+        rb.linearVelocity = Vector3.zero;
+
+        // Apply force in the specific direction the enemy was facing
+        // We add a tiny bit of 'up' (0.2f) so they don't get stuck on the floor
+        Vector3 finalDirection = (direction + Vector3.up * 0.2f).normalized;
+        rb.AddForce(finalDirection * force, ForceMode.Impulse);
+
+        yield return new WaitForSeconds(knockbackDuration);
+
+        isKnockedBack = false;
     }
 
 }

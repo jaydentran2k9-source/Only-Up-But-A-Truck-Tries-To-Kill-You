@@ -2,15 +2,18 @@ using UnityEngine;
 
 public class tRuCkknockback : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] private float hitForce = 15f;
 
-    // Update is called once per frame
-    void Update()
+    private void OnCollisionEnter(Collision collision)
     {
-        
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            PlayerMovement player = collision.gameObject.GetComponent<PlayerMovement>();
+            if (player != null)
+            {
+                // Send the Enemy's forward direction instead of position
+                player.ApplyKnockback(transform.forward, hitForce);
+            }
+        }
     }
 }
